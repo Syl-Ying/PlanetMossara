@@ -66,7 +66,7 @@ func _build_interface() -> void:
 	add_child(location_label)
 
 	hint_label = Label.new()
-	hint_label.text = "WASD  walk    mouse  look    Q  scent trace    E  soft pulse    Tab  observations"
+	hint_label.text = "WASD  move    Shift  slow walk    mouse  look    Q  scent    E  pulse    Tab  notes"
 	hint_label.position = Vector2(24.0, 682.0)
 	hint_label.add_theme_font_size_override("font_size", 13)
 	hint_label.add_theme_color_override("font_color", Color(0.86, 0.88, 0.84, 0.68))

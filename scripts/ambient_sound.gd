@@ -2,6 +2,7 @@ extends Node
 
 const MIX_RATE := 22050.0
 
+var bed_player: AudioStreamPlayer
 var player: AudioStreamPlayer
 var playback: AudioStreamGeneratorPlayback
 var rng := RandomNumberGenerator.new()
@@ -14,13 +15,23 @@ var call_frequency := 860.0
 
 func _ready() -> void:
 	rng.seed = 88173
+	bed_player = AudioStreamPlayer.new()
+	bed_player.name = "RainBasinBed"
+	var bed_stream := load("res://assets/vesta_ambience.ogg") as AudioStreamOggVorbis
+	if bed_stream:
+		bed_stream.loop = true
+		bed_player.stream = bed_stream
+		bed_player.volume_db = -4.0
+		add_child(bed_player)
+		bed_player.play()
+
 	player = AudioStreamPlayer.new()
-	player.name = "ProceduralWindAndFauna"
+	player.name = "DistantFaunaCalls"
 	var generator := AudioStreamGenerator.new()
 	generator.mix_rate = MIX_RATE
 	generator.buffer_length = 0.8
 	player.stream = generator
-	player.volume_db = -15.0
+	player.volume_db = -7.0
 	add_child(player)
 	player.play()
 	playback = player.get_stream_playback() as AudioStreamGeneratorPlayback
@@ -28,7 +39,9 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if playback == null:
-		return
+		playback = player.get_stream_playback() as AudioStreamGeneratorPlayback
+		if playback == null:
+			return
 	_fill_buffer(playback.get_frames_available())
 
 

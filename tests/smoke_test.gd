@@ -35,11 +35,15 @@ func _run() -> void:
 	if world.get_node_or_null("BloomGatePuzzle") != null:
 		_fail("task-driven bloom gate should not exist in quiet-walk mode")
 		return
-	if world.get_node_or_null("VestaAmbience") == null:
+	var ambience := world.get_node_or_null("VestaAmbience/RainBasinBed") as AudioStreamPlayer
+	if ambience == null or ambience.stream == null or not ambience.playing:
 		_fail("procedural ambience is missing")
 		return
 	if world.get_node_or_null("HiHatTree_00") == null:
 		_fail("Vesta scenery is missing")
+		return
+	if world.get_node_or_null("IllustratedHiHat_00") == null or world.get_node_or_null("IllustratedFlora_00") == null:
+		_fail("illustrated 2.5D vegetation layers are missing")
 		return
 	var discovered: Array[String] = ecosystem.discover_species_near(
 		Vector2(ecosystem.organisms[0].sim_position.x, ecosystem.organisms[0].sim_position.y), 0.5

@@ -36,6 +36,7 @@ func _configure_input() -> void:
 	_add_key_action("move_back", KEY_S)
 	_add_key_action("move_left", KEY_A)
 	_add_key_action("move_right", KEY_D)
+	_add_key_action("slow_walk", KEY_SHIFT)
 	_add_key_action("nutrient_signal", KEY_Q)
 	_add_key_action("light_signal", KEY_E)
 	_add_key_action("journal", KEY_TAB)
@@ -114,6 +115,7 @@ func _build_environment() -> void:
 	_build_hi_hat_grove()
 	_build_membrane_forms()
 	_build_finger_flora()
+	_build_illustrated_layers()
 	_build_ambient_fauna()
 
 
@@ -236,6 +238,58 @@ func _build_finger_flora() -> void:
 			finger.rotation_degrees.z = -16.0 + finger_index * 8.0
 			patch.add_child(finger)
 		add_child(patch)
+
+
+func _build_illustrated_layers() -> void:
+	var hihat_texture := load("res://assets/vesta_hihat_cluster.png") as Texture2D
+	var flora_texture := load("res://assets/vesta_foreground_flora.png") as Texture2D
+	var hihat_positions := [
+		[Vector3(-30.0, 7.2, -37.0), Vector2(12.0, 15.0)],
+		[Vector3(29.0, 6.4, -33.0), Vector2(10.5, 13.5)],
+		[Vector3(-40.0, 5.3, 9.0), Vector2(8.5, 11.0)],
+		[Vector3(41.0, 5.9, 15.0), Vector2(9.5, 12.0)],
+	]
+	for index in range(hihat_positions.size()):
+		_add_billboard(
+			"IllustratedHiHat_%02d" % index,
+			hihat_texture,
+			hihat_positions[index][0],
+			hihat_positions[index][1]
+		)
+	var flora_positions := [
+		[Vector3(-8.0, 1.55, -10.0), Vector2(8.5, 4.2)],
+		[Vector3(12.0, 1.25, -17.0), Vector2(7.0, 3.5)],
+		[Vector3(-18.0, 1.05, 8.0), Vector2(6.2, 3.1)],
+		[Vector3(21.0, 1.15, 10.0), Vector2(6.8, 3.4)],
+	]
+	for index in range(flora_positions.size()):
+		_add_billboard(
+			"IllustratedFlora_%02d" % index,
+			flora_texture,
+			flora_positions[index][0],
+			flora_positions[index][1]
+		)
+
+
+func _add_billboard(node_name: String, texture: Texture2D, world_position: Vector3, size: Vector2) -> void:
+	if texture == null:
+		return
+	var billboard := MeshInstance3D.new()
+	billboard.name = node_name
+	var quad := QuadMesh.new()
+	quad.size = size
+	quad.orientation = PlaneMesh.FACE_Z
+	billboard.mesh = quad
+	billboard.position = world_position
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = texture
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	material.alpha_scissor_threshold = 0.22
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	billboard.material_override = material
+	add_child(billboard)
 
 
 func _build_ambient_fauna() -> void:

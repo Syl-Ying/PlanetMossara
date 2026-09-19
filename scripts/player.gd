@@ -1,7 +1,8 @@
 extends CharacterBody3D
 
-const WALK_SPEED := 3.25
-const ACCELERATION := 8.0
+const WALK_SPEED := 5.6
+const SLOW_WALK_SPEED := 2.5
+const ACCELERATION := 15.0
 const MOUSE_SENSITIVITY := 0.00165
 
 var camera_pivot: Node3D
@@ -57,7 +58,8 @@ func _physics_process(delta: float) -> void:
 
 	var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var desired_direction := (transform.basis * Vector3(input_vector.x, 0.0, input_vector.y)).normalized()
-	var desired_velocity := desired_direction * WALK_SPEED
+	var current_speed := SLOW_WALK_SPEED if Input.is_action_pressed("slow_walk") else WALK_SPEED
+	var desired_velocity := desired_direction * current_speed
 	velocity.x = move_toward(velocity.x, desired_velocity.x, ACCELERATION * delta)
 	velocity.z = move_toward(velocity.z, desired_velocity.z, ACCELERATION * delta)
 	move_and_slide()
