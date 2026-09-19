@@ -1,8 +1,8 @@
 extends CharacterBody3D
 
-const WALK_SPEED := 7.5
-const ACCELERATION := 24.0
-const MOUSE_SENSITIVITY := 0.0022
+const WALK_SPEED := 3.25
+const ACCELERATION := 8.0
+const MOUSE_SENSITIVITY := 0.00165
 
 var camera_pivot: Node3D
 var camera: Camera3D
@@ -30,7 +30,7 @@ func _build_body() -> void:
 	camera = Camera3D.new()
 	camera.name = "Camera"
 	camera.current = true
-	camera.fov = 72.0
+	camera.fov = 66.0
 	camera.near = 0.08
 	camera_pivot.add_child(camera)
 
@@ -61,3 +61,5 @@ func _physics_process(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, desired_velocity.x, ACCELERATION * delta)
 	velocity.z = move_toward(velocity.z, desired_velocity.z, ACCELERATION * delta)
 	move_and_slide()
+	var stillness := 1.0 - clampf(Vector2(velocity.x, velocity.z).length() / WALK_SPEED, 0.0, 1.0)
+	camera.position.y = sin(Time.get_ticks_msec() * 0.00072) * 0.012 * stillness

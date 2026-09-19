@@ -91,14 +91,14 @@ func _update_signals(delta: float) -> void:
 func _update_grazer(grazer: Node3D, delta: float) -> void:
 	var nearest_stalker := _nearest_species(grazer, LivingOrganism.Species.VEIL_STALKER, true)
 	if nearest_stalker and grazer.sim_position.distance_squared_to(nearest_stalker.sim_position) < 144.0:
-		grazer.move_velocity = grazer.sim_position.direction_to(nearest_stalker.sim_position) * -7.0
+		grazer.move_velocity = grazer.sim_position.direction_to(nearest_stalker.sim_position) * -3.4
 		grazer.set_behavior(LivingOrganism.Behavior.FLEEING)
 		grazer.energy = maxf(0.0, grazer.energy - 0.8 * delta)
 		return
 
 	var nutrient := _strongest_signal("nutrient", grazer.sim_position)
 	if not nutrient.is_empty():
-		grazer.move_velocity = grazer.sim_position.direction_to(nutrient["position"]) * 3.6
+		grazer.move_velocity = grazer.sim_position.direction_to(nutrient["position"]) * 1.35
 		grazer.set_behavior(LivingOrganism.Behavior.ATTRACTED)
 		return
 
@@ -112,19 +112,19 @@ func _update_grazer(grazer: Node3D, delta: float) -> void:
 			grazer.move_velocity = Vector2.ZERO
 			grazer.set_behavior(LivingOrganism.Behavior.FEEDING)
 		elif distance_squared < 900.0:
-			grazer.move_velocity = grazer.sim_position.direction_to(nearest_reed.sim_position) * 2.4
+			grazer.move_velocity = grazer.sim_position.direction_to(nearest_reed.sim_position) * 1.0
 			grazer.set_behavior(LivingOrganism.Behavior.FORAGING)
 		else:
-			_wander(grazer, 0.37, 1.2)
+			_wander(grazer, 0.24, 0.48)
 	else:
-		_wander(grazer, 0.37, 1.2)
+		_wander(grazer, 0.24, 0.48)
 	grazer.energy = maxf(0.0, grazer.energy - 0.16 * delta)
 
 
 func _update_stalker(stalker: Node3D, delta: float) -> void:
 	var defensive := _strongest_signal("light", stalker.sim_position)
 	if not defensive.is_empty():
-		stalker.move_velocity = stalker.sim_position.direction_to(defensive["position"]) * -8.0
+		stalker.move_velocity = stalker.sim_position.direction_to(defensive["position"]) * -2.8
 		stalker.set_behavior(LivingOrganism.Behavior.FLEEING)
 		stalker.energy = maxf(0.0, stalker.energy - 0.5 * delta)
 		return
@@ -139,12 +139,12 @@ func _update_stalker(stalker: Node3D, delta: float) -> void:
 			stalker.move_velocity = Vector2.ZERO
 			stalker.set_behavior(LivingOrganism.Behavior.FEEDING)
 		elif distance_squared < 1444.0:
-			stalker.move_velocity = stalker.sim_position.direction_to(nearest_grazer.sim_position) * 3.1
+			stalker.move_velocity = stalker.sim_position.direction_to(nearest_grazer.sim_position) * 1.2
 			stalker.set_behavior(LivingOrganism.Behavior.HUNTING)
 		else:
-			_wander(stalker, 0.21, 1.0)
+			_wander(stalker, 0.14, 0.52)
 	else:
-		_wander(stalker, 0.21, 1.0)
+		_wander(stalker, 0.14, 0.52)
 	stalker.energy = maxf(0.0, stalker.energy - 0.22 * delta)
 
 
@@ -200,7 +200,7 @@ func create_bio_signal(kind: String, world_position: Vector3) -> void:
 		"ttl": lifetime,
 		"visual": visual,
 	})
-	get_tree().call_group("hud", "show_ecology_message", "Nutrient lure released" if kind == "nutrient" else "Defensive light released")
+	get_tree().call_group("hud", "show_ecology_message", "A scent trace enters the basin" if kind == "nutrient" else "A soft pulse passes through the ground")
 
 
 func _create_signal_visual(radius: float, color: Color) -> MeshInstance3D:
@@ -264,13 +264,7 @@ func discover_species_near(center: Vector2, radius: float) -> Array[String]:
 	for organism in organisms:
 		if organism.sim_position.distance_squared_to(center) > radius_squared:
 			continue
-		var species_name := ""
-		if organism.species == LivingOrganism.Species.GLOW_REED:
-			species_name = "Glow Reed"
-		elif organism.species == LivingOrganism.Species.BURROW_GRAZER:
-			species_name = "Burrow Grazer"
-		else:
-			species_name = "Veil Stalker"
+		var species_name: String = organism.get_display_name()
 		if species_name not in discoveries:
 			discoveries.append(species_name)
 	return discoveries

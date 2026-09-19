@@ -32,20 +32,23 @@ func _run() -> void:
 		_fail("signals were not registered")
 		return
 
-	var puzzle := get_first_node_in_group("puzzle")
-	if puzzle == null:
-		_fail("bloom gate puzzle is missing")
+	if world.get_node_or_null("BloomGatePuzzle") != null:
+		_fail("task-driven bloom gate should not exist in quiet-walk mode")
 		return
-	var grazers: Array[Node3D] = ecosystem.get_grazers()
-	for index in 3:
-		grazers[index].sim_position = Vector2(float(index) - 1.0, -23.0)
-		grazers[index]._sync_transform()
-	puzzle._process(3.1)
-	if not puzzle.is_open:
-		_fail("bloom gate did not open after three grazers held the lure zone")
+	if world.get_node_or_null("VestaAmbience") == null:
+		_fail("procedural ambience is missing")
+		return
+	if world.get_node_or_null("HiHatTree_00") == null:
+		_fail("Vesta scenery is missing")
+		return
+	var discovered: Array[String] = ecosystem.discover_species_near(
+		Vector2(ecosystem.organisms[0].sim_position.x, ecosystem.organisms[0].sim_position.y), 0.5
+	)
+	if "Spore Tree" not in discovered:
+		_fail("Vesta species naming is not connected to observations")
 		return
 
-	print("PASS: Godot scene, populations, bio-signals, journal hooks, and bloom gate validated")
+	print("PASS: quiet-walk scene, Vesta ecology, ambience, observations, and optional bio-signals validated")
 	world.queue_free()
 	quit(0)
 
