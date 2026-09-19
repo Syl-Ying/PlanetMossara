@@ -1,0 +1,22 @@
+# Godot-generated editor data and imports
+.godot/
+
+# Runtime logs and local user data
+logs/
+user/
+*.log
+
+# Exported builds
+build/
+dist/
+exports/
+*.app
+*.dmg
+*.zip
+
+# macOS metadata
+.DS_Store
+
+# Local IDE settings
+.vscode/
+.idea/
