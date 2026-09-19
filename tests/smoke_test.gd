@@ -39,11 +39,15 @@ func _run() -> void:
 	if ambience == null or ambience.stream == null or not ambience.playing:
 		_fail("procedural ambience is missing")
 		return
-	if world.get_node_or_null("HiHatTree_00") == null:
-		_fail("Vesta scenery is missing")
+	var flora := world.get_node_or_null("VolumetricFlora")
+	var flora_mesh_count: int = 0
+	if flora:
+		flora_mesh_count = flora.get_mesh_count()
+	if flora == null or flora_mesh_count < 180:
+		_fail("volumetric 3D ecology is missing or too sparse")
 		return
-	if world.get_node_or_null("IllustratedHiHat_00") == null or world.get_node_or_null("IllustratedFlora_00") == null:
-		_fail("illustrated 2.5D vegetation layers are missing")
+	if world.get_node_or_null("IllustratedHiHat_00") != null or world.get_node_or_null("IllustratedFlora_00") != null:
+		_fail("2D billboard vegetation should not be instantiated")
 		return
 	var discovered: Array[String] = ecosystem.discover_species_near(
 		Vector2(ecosystem.organisms[0].sim_position.x, ecosystem.organisms[0].sim_position.y), 0.5
@@ -52,7 +56,7 @@ func _run() -> void:
 		_fail("Vesta species naming is not connected to observations")
 		return
 
-	print("PASS: quiet-walk scene, Vesta ecology, ambience, observations, and optional bio-signals validated")
+	print("PASS: quiet-walk scene with %d volumetric flora meshes, ambience, observations, and optional bio-signals validated" % flora_mesh_count)
 	world.queue_free()
 	quit(0)
 

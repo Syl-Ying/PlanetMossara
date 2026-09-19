@@ -4,6 +4,7 @@ const EcosystemScript := preload("res://scripts/ecosystem.gd")
 const PlayerScript := preload("res://scripts/player.gd")
 const HudScript := preload("res://scripts/hud.gd")
 const AmbientSoundScript := preload("res://scripts/ambient_sound.gd")
+const VolumetricFloraScript := preload("res://scripts/volumetric_flora.gd")
 
 var ambient_fliers: Array[Node3D] = []
 
@@ -112,10 +113,7 @@ func _build_environment() -> void:
 	add_child(ground_body)
 
 	_build_puddles()
-	_build_hi_hat_grove()
-	_build_membrane_forms()
-	_build_finger_flora()
-	_build_illustrated_layers()
+	_spawn_volumetric_flora()
 	_build_ambient_fauna()
 
 
@@ -124,7 +122,11 @@ func _toon_material(color: Color, roughness := 0.9) -> StandardMaterial3D:
 	material.albedo_color = color
 	material.roughness = roughness
 	material.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-	material.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	material.specular_mode = BaseMaterial3D.SPECULAR_TOON
+	material.metallic_specular = 0.14
+	material.rim_enabled = true
+	material.rim = 0.26
+	material.rim_tint = 0.42
 	return material
 
 
@@ -147,149 +149,11 @@ func _build_puddles() -> void:
 		add_child(puddle)
 
 
-func _build_hi_hat_grove() -> void:
-	var stem_material := _toon_material(Color("30313d"))
-	var cap_material := _toon_material(Color("626d7b"))
-	var grove := [
-		Vector3(-31, 0, -31), Vector3(-23, 0, -36), Vector3(-35, 0, -12),
-		Vector3(30, 0, -35), Vector3(37, 0, -18), Vector3(24, 0, -28),
-		Vector3(-42, 0, 12), Vector3(43, 0, 18), Vector3(31, 0, 34),
-		Vector3(-29, 0, 31), Vector3(8, 0, -45), Vector3(-9, 0, -42),
-	]
-	for index in range(grove.size()):
-		var tree := Node3D.new()
-		tree.name = "HiHatTree_%02d" % index
-		tree.position = grove[index]
-		var height := 6.5 + float(index % 4) * 1.8
-		var stem := MeshInstance3D.new()
-		var stem_mesh := CylinderMesh.new()
-		stem_mesh.top_radius = 0.08
-		stem_mesh.bottom_radius = 0.19
-		stem_mesh.height = height
-		stem_mesh.radial_segments = 7
-		stem.mesh = stem_mesh
-		stem.material_override = stem_material
-		stem.position.y = height * 0.5
-		stem.rotation_degrees.z = -4.0 + float(index % 3) * 4.0
-		tree.add_child(stem)
-		var cap := MeshInstance3D.new()
-		var cap_mesh := CylinderMesh.new()
-		cap_mesh.top_radius = 2.0 + float(index % 3) * 0.35
-		cap_mesh.bottom_radius = cap_mesh.top_radius * 0.82
-		cap_mesh.height = 0.24
-		cap_mesh.radial_segments = 12
-		cap.mesh = cap_mesh
-		cap.material_override = cap_material
-		cap.position.y = height
-		cap.scale.z = 0.72
-		tree.add_child(cap)
-		add_child(tree)
-
-
-func _build_membrane_forms() -> void:
-	var bone_material := _toon_material(Color("4d4654"))
-	var veil_material := _toon_material(Color(0.72, 0.46, 0.44, 0.72), 1.0)
-	veil_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	for index in range(5):
-		var form := Node3D.new()
-		form.name = "RainMembrane_%02d" % index
-		form.position = Vector3(-39.0 + index * 18.0, 0.0, -46.0 + float(index % 2) * 6.0)
-		var spine := MeshInstance3D.new()
-		var spine_mesh := CylinderMesh.new()
-		spine_mesh.top_radius = 0.16
-		spine_mesh.bottom_radius = 0.55
-		spine_mesh.height = 10.0 + index
-		spine_mesh.radial_segments = 7
-		spine.mesh = spine_mesh
-		spine.material_override = bone_material
-		spine.position.y = spine_mesh.height * 0.5
-		spine.rotation_degrees.z = -10.0 + index * 4.0
-		form.add_child(spine)
-		var veil := MeshInstance3D.new()
-		var veil_mesh := PrismMesh.new()
-		veil_mesh.size = Vector3(5.0, 6.5, 0.18)
-		veil.mesh = veil_mesh
-		veil.material_override = veil_material
-		veil.position = Vector3(1.1, 6.2 + index * 0.5, 0.0)
-		veil.rotation_degrees.z = -13.0 + index * 3.0
-		form.add_child(veil)
-		add_child(form)
-
-
-func _build_finger_flora() -> void:
-	var palettes := [Color("4b334e"), Color("786067"), Color("92706c"), Color("3c5960")]
-	for patch_index in range(18):
-		var patch := Node3D.new()
-		patch.name = "FingerFlora_%02d" % patch_index
-		var angle := patch_index * 2.19
-		var radius := 14.0 + float((patch_index * 11) % 28)
-		patch.position = Vector3(cos(angle) * radius, 0.0, sin(angle) * radius)
-		var material := _toon_material(palettes[patch_index % palettes.size()])
-		for finger_index in range(3 + patch_index % 4):
-			var finger := MeshInstance3D.new()
-			var mesh := CapsuleMesh.new()
-			mesh.radius = 0.12 + finger_index * 0.025
-			mesh.height = 0.8 + float((finger_index + patch_index) % 4) * 0.35
-			mesh.radial_segments = 7
-			mesh.rings = 4
-			finger.mesh = mesh
-			finger.material_override = material
-			finger.position = Vector3((finger_index - 2) * 0.28, mesh.height * 0.45, sin(finger_index) * 0.22)
-			finger.rotation_degrees.z = -16.0 + finger_index * 8.0
-			patch.add_child(finger)
-		add_child(patch)
-
-
-func _build_illustrated_layers() -> void:
-	var hihat_texture := load("res://assets/vesta_hihat_cluster.png") as Texture2D
-	var flora_texture := load("res://assets/vesta_foreground_flora.png") as Texture2D
-	var hihat_positions := [
-		[Vector3(-30.0, 7.2, -37.0), Vector2(12.0, 15.0)],
-		[Vector3(29.0, 6.4, -33.0), Vector2(10.5, 13.5)],
-		[Vector3(-40.0, 5.3, 9.0), Vector2(8.5, 11.0)],
-		[Vector3(41.0, 5.9, 15.0), Vector2(9.5, 12.0)],
-	]
-	for index in range(hihat_positions.size()):
-		_add_billboard(
-			"IllustratedHiHat_%02d" % index,
-			hihat_texture,
-			hihat_positions[index][0],
-			hihat_positions[index][1]
-		)
-	var flora_positions := [
-		[Vector3(-8.0, 1.55, -10.0), Vector2(8.5, 4.2)],
-		[Vector3(12.0, 1.25, -17.0), Vector2(7.0, 3.5)],
-		[Vector3(-18.0, 1.05, 8.0), Vector2(6.2, 3.1)],
-		[Vector3(21.0, 1.15, 10.0), Vector2(6.8, 3.4)],
-	]
-	for index in range(flora_positions.size()):
-		_add_billboard(
-			"IllustratedFlora_%02d" % index,
-			flora_texture,
-			flora_positions[index][0],
-			flora_positions[index][1]
-		)
-
-
-func _add_billboard(node_name: String, texture: Texture2D, world_position: Vector3, size: Vector2) -> void:
-	if texture == null:
-		return
-	var billboard := MeshInstance3D.new()
-	billboard.name = node_name
-	var quad := QuadMesh.new()
-	quad.size = size
-	quad.orientation = PlaneMesh.FACE_Z
-	billboard.mesh = quad
-	billboard.position = world_position
-	var material := StandardMaterial3D.new()
-	material.albedo_texture = texture
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-	material.alpha_scissor_threshold = 0.22
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	billboard.material_override = material
-	add_child(billboard)
+func _spawn_volumetric_flora() -> void:
+	var flora := Node3D.new()
+	flora.name = "VolumetricFlora"
+	flora.set_script(VolumetricFloraScript)
+	add_child(flora)
 
 
 func _build_ambient_fauna() -> void:

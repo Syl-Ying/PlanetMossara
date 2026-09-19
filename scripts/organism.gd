@@ -39,9 +39,13 @@ func get_display_name() -> String:
 func _make_toon(color: Color, transparent := false) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
-	material.roughness = 0.94
+	material.roughness = 0.78
 	material.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-	material.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	material.specular_mode = BaseMaterial3D.SPECULAR_TOON
+	material.metallic_specular = 0.13
+	material.rim_enabled = true
+	material.rim = 0.32
+	material.rim_tint = 0.5
 	if transparent:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	return material
