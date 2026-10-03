@@ -1,48 +1,52 @@
-# Scavengers Reign — Vesta Quiet Walk
+[English](README.md) | [Chinese / 中文](README-zh.md)
 
-为 M1/16GB Mac 制作的轻量 Godot 4 私人同人体验。重点不是任务、胜负或生存数值，而是慢慢行走、观看 Vesta 群落自行运转，并听环境的层次变化。
+# Mossara · 苔汐星
 
-这是非商业 fan study。项目不包含剧集截图、原声或提取素材；程序化3D场景用接近二维动画的哑光色块、雾化层次与低面数剪影来研究《Scavengers Reign》的生态氛围。
+**苔汐星 · Mossara** is the name of the planet. “苔” (moss) evokes a damp ecology that grows slowly; “汐” (tide) evokes shallow-water basins and cyclical change.
 
-## 目前体验
+A lightweight Godot 4 exploration experience made for an M1 Mac with 16 GB of memory. The focus is on walking slowly, watching ecological communities go about their lives, and listening to layers of ambient sound, without missions, win conditions, or survival stats.
 
-- 没有主线、开门谜题、倒计时或通关目标。
-- 正常移动速度与克制的66°视角；按住 `Shift` 才会慢走观察。
-- 雨后浅水盆地与完整3D生态群：有分叉骨架和双层伞盖的 Hi-hat trees、立体膜状植物、扇叶群落、孢子杯与远景 Rain Skimmers。
-- Spore Trees、Pigoids 与 Sterq Serpents 会进食、追踪、逃避和缓慢游荡。
-- 程序化生成风、低频、水滴与稀疏生物鸣叫，不需要外部音频文件。
-- 接近生物会自动留下观察记录；`Tab` 可随时查看。
-- `Q` 留下一小段气味痕迹，`E` 发出柔和地面脉冲；两者完全可选。
-- Compatibility 渲染器和低面数模型，适合 M1/16GB。
+This is a non-commercial fan study inspired by *Scavengers Reign*. It contains no screenshots, soundtrack recordings, or extracted assets from the series. Its procedural 3D environments explore the show's ecological atmosphere through matte colors, misty depth, and low-poly silhouettes reminiscent of 2D animation. Existing builds and asset paths still use the earlier name **Vesta Quiet Walk**.
 
-更具体的美术与声音原则见 [ART_DIRECTION.md](ART_DIRECTION.md)。
+## Current experience
 
-## 运行
+- No main quest, door puzzles, countdowns, or completion goals.
+- Normal walking speed with a restrained 66° field of view; hold `Shift` to slow down and observe.
+- A shallow basin after rain, with fully 3D ecological communities: branching Hi-hat trees with layered canopies, membrane plants, fan-leaf clusters, spore cups, and distant Rain Skimmers.
+- Spore Trees, Pigoids, and Sterq Serpents feed, track, flee, and wander slowly.
+- Procedurally generated wind, low tones, water droplets, and sparse creature calls, without external audio files.
+- Approaching organisms automatically adds observation notes; open them with `Tab`.
+- `Q` leaves a short scent trail; `E` sends a gentle ground pulse. Both are optional.
+- The Compatibility renderer and low-poly models keep the experience lightweight for an M1/16 GB Mac.
 
-双击 `launch_godot.command`；或者在 Godot 4 中 Import 本目录的 `project.godot` 后运行。
+See [ART_DIRECTION.md](ART_DIRECTION.md) for the art and sound principles.
 
-操作：
+## Running the project
 
-- `WASD`：移动
-- `Shift`：按住慢走
-- 鼠标：观察
-- `Q`：气味痕迹（可选）
-- `E`：柔和脉冲（可选）
-- `Tab`：观察记录
-- `Esc`：释放鼠标
+Double-click `launch_godot.command`, or import this directory's `project.godot` in Godot 4 and run it.
 
-## 自动验证
+Controls:
+
+- `WASD`: move
+- `Shift`: hold to walk slowly
+- Mouse: look around
+- `Q`: scent trail (optional)
+- `E`: gentle pulse (optional)
+- `Tab`: observation journal
+- `Esc`: release the mouse
+
+## Automated validation
 
 ```bash
 /path/to/godot --headless --path . --script res://tests/smoke_test.gd
 ```
 
-## 下一步
+## Next steps
 
-1. 加入昼夜与降雨密度的极慢变化。
-2. 为不同生物增加距离分层的环境声，而不是背景音乐。
-3. 加入“只发生一次、也可能被错过”的无任务生态事件。
-4. 继续用定制网格和骨骼动画替换剩余的基础几何体。
+1. Add very slow changes in daylight and rainfall intensity.
+2. Add creature sounds layered by distance, rather than background music.
+3. Add ecological events that happen only once and can be missed, without turning them into quests.
+4. Continue replacing remaining primitives with custom meshes and skeletal animation.
 
 ## Reference-based 3D models
 
