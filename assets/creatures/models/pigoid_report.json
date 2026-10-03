@@ -1,0 +1,11 @@
+{
+  "species": "pigoid",
+  "bones": 20,
+  "meshes": 50,
+  "triangles": 31660,
+  "actions": [
+    "Feed",
+    "Idle",
+    "Walk"
+  ]
+}

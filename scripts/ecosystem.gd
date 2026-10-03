@@ -1,6 +1,7 @@
 extends Node3D
 
 const OrganismScript := preload("res://scripts/organism.gd")
+const CreatureMotion = preload("res://scripts/creature_motion.gd")
 const FIXED_STEP := 1.0 / 30.0
 const WORLD_HALF_EXTENT := 45.0
 
@@ -10,6 +11,8 @@ var rng := RandomNumberGenerator.new()
 var next_id := 1
 var elapsed_seconds := 0.0
 var accumulator := 0.0
+var grazer_food_targets: Dictionary = {}
+var spawns_settled := false
 
 
 func _ready() -> void:
@@ -45,6 +48,14 @@ func _populate_default_world() -> void:
 
 
 func _add_organism(species: int, start_position: Vector2, energy: float) -> Node3D:
+	if species==LivingOrganism.Species.GLOW_REED:
+		var site := get_parent().get_node_or_null("CrashSite")
+		if site:
+			var local: Vector3=site.to_local(Vector3(start_position.x,0,start_position.y))
+			if local.x>-4.0 and local.x<14.0 and absf(local.z)<5.3:
+				local.z=(5.9+absf(sin(local.x*2.7))*1.1)*(1.0 if local.z>=0 else -1.0)
+				var relocated: Vector3=site.to_global(local)
+				start_position=Vector2(relocated.x,relocated.z)
 	var organism := Node3D.new()
 	organism.name = "Organism_%03d" % next_id
 	organism.set_script(OrganismScript)
@@ -56,6 +67,10 @@ func _add_organism(species: int, start_position: Vector2, energy: float) -> Node
 
 
 func _step_simulation(delta: float) -> void:
+	if not spawns_settled:
+		for actor in organisms:
+			if actor.species!=0:CreatureMotion.settle_spawn(actor,organisms)
+		spawns_settled=true
 	elapsed_seconds += delta
 	_update_signals(delta)
 
@@ -66,14 +81,17 @@ func _step_simulation(delta: float) -> void:
 
 	for organism in organisms:
 		if organism.species == LivingOrganism.Species.BURROW_GRAZER:
+			var previous_velocity: Vector2 = organism.move_velocity
 			_update_grazer(organism, delta)
+			# Accelerate/brake through decisions rather than teleporting the velocity.
+			organism.move_velocity = previous_velocity.move_toward(organism.move_velocity, 6.0 * delta)
 		elif organism.species == LivingOrganism.Species.VEIL_STALKER:
 			_update_stalker(organism, delta)
 
 	for organism in organisms:
 		if organism.species == LivingOrganism.Species.GLOW_REED:
 			continue
-		organism.sim_position += organism.move_velocity * delta
+		CreatureMotion.move(organism,organisms,delta)
 		organism.sim_position.x = clampf(organism.sim_position.x, -WORLD_HALF_EXTENT, WORLD_HALF_EXTENT)
 		organism.sim_position.y = clampf(organism.sim_position.y, -WORLD_HALF_EXTENT, WORLD_HALF_EXTENT)
 		organism._sync_transform()
@@ -89,8 +107,10 @@ func _update_signals(delta: float) -> void:
 
 
 func _update_grazer(grazer: Node3D, delta: float) -> void:
+	grazer.has_feeding_target = false
 	var nearest_stalker := _nearest_species(grazer, LivingOrganism.Species.VEIL_STALKER, true)
-	if nearest_stalker and grazer.sim_position.distance_squared_to(nearest_stalker.sim_position) < 144.0:
+	var escape_radius := 16.0 if grazer.behavior == LivingOrganism.Behavior.FLEEING else 12.0
+	if nearest_stalker and grazer.sim_position.distance_squared_to(nearest_stalker.sim_position) < escape_radius * escape_radius:
 		grazer.move_velocity = grazer.sim_position.direction_to(nearest_stalker.sim_position) * -3.4
 		grazer.set_behavior(LivingOrganism.Behavior.FLEEING)
 		grazer.energy = maxf(0.0, grazer.energy - 0.8 * delta)
@@ -98,14 +118,29 @@ func _update_grazer(grazer: Node3D, delta: float) -> void:
 
 	var nutrient := _strongest_signal("nutrient", grazer.sim_position)
 	if not nutrient.is_empty():
-		grazer.move_velocity = grazer.sim_position.direction_to(nutrient["position"]) * 1.35
+		var signal_offset: Vector2 = nutrient["position"] - grazer.sim_position
+		grazer.move_velocity = signal_offset.normalized() * minf(1.35, signal_offset.length()) if signal_offset.length() > 0.3 else Vector2.ZERO
 		grazer.set_behavior(LivingOrganism.Behavior.ATTRACTED)
 		return
 
-	var nearest_reed := _nearest_species(grazer, LivingOrganism.Species.GLOW_REED, false)
+	# Commit to a food source until depleted. Do not chase an empty reed's center.
+	var nearest_reed: Node3D = grazer_food_targets.get(grazer.organism_id)
+	if not is_instance_valid(nearest_reed) or nearest_reed.energy <= 1.0:
+		nearest_reed = null
+		var best_distance := INF
+		for candidate in organisms:
+			if candidate.species != LivingOrganism.Species.GLOW_REED or candidate.energy < 12.0:
+				continue
+			var distance: float = grazer.sim_position.distance_squared_to(candidate.sim_position)
+			if distance < best_distance:
+				best_distance = distance
+				nearest_reed = candidate
+		grazer_food_targets[grazer.organism_id] = nearest_reed
 	if nearest_reed:
 		var distance_squared: float = grazer.sim_position.distance_squared_to(nearest_reed.sim_position)
-		if distance_squared < 3.24 and nearest_reed.energy >= 8.0:
+		if distance_squared < 3.24 and nearest_reed.energy > 1.0:
+			grazer.feeding_target = nearest_reed.sim_position
+			grazer.has_feeding_target = true
 			var bite := minf(nearest_reed.energy, 7.0 * delta)
 			nearest_reed.energy -= bite
 			grazer.energy = minf(100.0, grazer.energy + bite * 0.65)
@@ -122,6 +157,7 @@ func _update_grazer(grazer: Node3D, delta: float) -> void:
 
 
 func _update_stalker(stalker: Node3D, delta: float) -> void:
+	stalker.has_feeding_target = false
 	var defensive := _strongest_signal("light", stalker.sim_position)
 	if not defensive.is_empty():
 		stalker.move_velocity = stalker.sim_position.direction_to(defensive["position"]) * -2.8
@@ -132,7 +168,9 @@ func _update_stalker(stalker: Node3D, delta: float) -> void:
 	var nearest_grazer := _nearest_species(stalker, LivingOrganism.Species.BURROW_GRAZER, true)
 	if nearest_grazer:
 		var distance_squared: float = stalker.sim_position.distance_squared_to(nearest_grazer.sim_position)
-		if distance_squared < 1.82:
+		if distance_squared < 10.24:
+			stalker.has_feeding_target = true
+			stalker.feeding_target = nearest_grazer.sim_position
 			var feeding := minf(nearest_grazer.energy, 14.0 * delta)
 			nearest_grazer.energy -= feeding
 			stalker.energy = minf(100.0, stalker.energy + feeding * 0.45)

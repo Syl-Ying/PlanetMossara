@@ -1,0 +1,11 @@
+{
+  "species": "sterq",
+  "bones": 19,
+  "meshes": 41,
+  "triangles": 37662,
+  "actions": [
+    "Alert",
+    "Idle",
+    "Walk"
+  ]
+}

@@ -16,10 +16,27 @@ var behavior := Behavior.ROOTED
 var energy := 100.0
 var sim_position := Vector2.ZERO
 var move_velocity := Vector2.ZERO
+var feeding_target := Vector2.ZERO
+var has_feeding_target := false
+var avoidance_time := 0.0
+var avoidance_direction := Vector2.ZERO
 var body_visual: Node3D
 var body_material: StandardMaterial3D
 var accent_material: StandardMaterial3D
 var base_height := 0.0
+var creature_animation: AnimationPlayer
+var creature_model: Node3D
+var _render_previous := Vector3.ZERO
+var _render_current := Vector3.ZERO
+var _transform_initialized := false
+var _walking := false
+var pigoid_gait: RefCounted
+var sterq_gait: RefCounted
+const SterqGait = preload("res://scripts/sterq_gait.gd")
+const PigoidGait = preload("res://scripts/pigoid_gait.gd")
+const PigoidScene = preload("res://assets/creatures/models/pigoid.glb")
+const SterqScene = preload("res://assets/creatures/models/sterq.glb")
+const CreatureShader = preload("res://assets/shaders/creature_ink.gdshader")
 
 
 func configure(new_id: int, new_species: int, start_position: Vector2, start_energy: float) -> void:
@@ -28,8 +45,8 @@ func configure(new_id: int, new_species: int, start_position: Vector2, start_ene
 	sim_position = start_position
 	energy = start_energy
 	behavior = Behavior.ROOTED if species == Species.GLOW_REED else Behavior.WANDERING
-	_build_visual()
 	_sync_transform()
+	_build_visual()
 
 
 func get_display_name() -> String:
@@ -41,9 +58,9 @@ func _make_toon(color: Color, transparent := false) -> StandardMaterial3D:
 	material.albedo_color = color
 	material.roughness = 0.78
 	material.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-	material.specular_mode = BaseMaterial3D.SPECULAR_TOON
+	material.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	material.metallic_specular = 0.13
-	material.rim_enabled = true
+	material.rim_enabled = false
 	material.rim = 0.32
 	material.rim_tint = 0.5
 	if transparent:
@@ -110,148 +127,63 @@ func _build_spore_tree() -> void:
 
 
 func _build_pigoid() -> void:
-	base_height = 0.56
-	body_material = _make_toon(Color("c1beb0"))
-	accent_material = _make_toon(Color("728b8b"))
-	var body_mesh := SphereMesh.new()
-	body_mesh.radius = 0.55
-	body_mesh.height = 0.95
-	body_mesh.radial_segments = 10
-	body_mesh.rings = 6
-	_add_outlined_part(body_mesh, Vector3(0.0, base_height, 0.0), Vector3.ZERO, Vector3(0.92, 0.62, 1.45), body_material)
-
-	for plate_index in range(4):
-		var plate := MeshInstance3D.new()
-		var plate_mesh := SphereMesh.new()
-		plate_mesh.radius = 0.32
-		plate_mesh.height = 0.22
-		plate_mesh.radial_segments = 8
-		plate_mesh.rings = 4
-		plate.mesh = plate_mesh
-		plate.material_override = accent_material
-		plate.position = Vector3(0.0, 0.95, -0.48 + plate_index * 0.34)
-		plate.scale = Vector3(1.15, 0.42, 0.8)
-		body_visual.add_child(plate)
-
-	var leg_material := _make_toon(Color("5f6663"))
-	for z_offset in [-0.5, 0.0, 0.5]:
-		for side in [-1.0, 1.0]:
-			var leg := MeshInstance3D.new()
-			var leg_mesh := CylinderMesh.new()
-			leg_mesh.top_radius = 0.075
-			leg_mesh.bottom_radius = 0.11
-			leg_mesh.height = 0.58
-			leg_mesh.radial_segments = 6
-			leg.mesh = leg_mesh
-			leg.material_override = leg_material
-			leg.position = Vector3(side * 0.48, 0.31, z_offset)
-			leg.rotation_degrees.z = side * -28.0
-			body_visual.add_child(leg)
-
-	var snout := MeshInstance3D.new()
-	var snout_mesh := CylinderMesh.new()
-	snout_mesh.top_radius = 0.055
-	snout_mesh.bottom_radius = 0.13
-	snout_mesh.height = 0.92
-	snout_mesh.radial_segments = 7
-	snout.mesh = snout_mesh
-	snout.material_override = leg_material
-	snout.position = Vector3(0.0, 0.48, -1.05)
-	snout.rotation_degrees.x = 73.0
-	body_visual.add_child(snout)
-	_add_feelers(Color("7fb2bc"), 0.82, -0.7)
+	_load_creature(PigoidScene, 0.62)
+	creature_animation.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	pigoid_gait = PigoidGait.new()
+	pigoid_gait.setup(self, creature_model)
 
 
 func _build_sterq_serpent() -> void:
-	base_height = 0.54
-	body_material = _make_toon(Color("84636d"))
-	accent_material = _make_toon(Color(0.42, 0.24, 0.31, 0.82), true)
-	var body_mesh := SphereMesh.new()
-	body_mesh.radius = 0.62
-	body_mesh.height = 1.08
-	body_mesh.radial_segments = 10
-	body_mesh.rings = 6
-	_add_outlined_part(body_mesh, Vector3(0.0, base_height, 0.0), Vector3.ZERO, Vector3(0.74, 0.52, 1.72), body_material)
-
-	for side in [-1.0, 1.0]:
-		var veil := MeshInstance3D.new()
-		var veil_mesh := PrismMesh.new()
-		veil_mesh.size = Vector3(1.25, 0.10, 2.35)
-		veil.mesh = veil_mesh
-		veil.material_override = accent_material
-		veil.position = Vector3(side * 0.55, 0.75, 0.20)
-		veil.rotation_degrees = Vector3(0.0, side * 7.0, side * 16.0)
-		body_visual.add_child(veil)
-
-	var limb_material := _make_toon(Color("423c43"))
-	for z_offset in [-0.47, 0.42]:
-		for side in [-1.0, 1.0]:
-			var limb := MeshInstance3D.new()
-			var limb_mesh := CylinderMesh.new()
-			limb_mesh.top_radius = 0.065
-			limb_mesh.bottom_radius = 0.13
-			limb_mesh.height = 0.82
-			limb_mesh.radial_segments = 6
-			limb.mesh = limb_mesh
-			limb.material_override = limb_material
-			limb.position = Vector3(side * 0.48, 0.25, z_offset)
-			limb.rotation_degrees.z = side * -38.0
-			body_visual.add_child(limb)
-
-	for side in [-1.0, 1.0]:
-		var eye := MeshInstance3D.new()
-		var eye_mesh := SphereMesh.new()
-		eye_mesh.radius = 0.055
-		eye_mesh.height = 0.11
-		eye_mesh.radial_segments = 6
-		eye_mesh.rings = 3
-		eye.mesh = eye_mesh
-		var eye_material := _make_toon(Color("e4b56b"))
-		eye_material.emission_enabled = true
-		eye_material.emission = Color("a45b40")
-		eye_material.emission_energy_multiplier = 0.65
-		eye.material_override = eye_material
-		eye.position = Vector3(side * 0.22, 0.72, -0.93)
-		body_visual.add_child(eye)
-	_add_feelers(Color("754752"), 1.25, -0.8)
+	_load_creature(SterqScene, 0.64)
+	creature_animation.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	sterq_gait = SterqGait.new()
+	sterq_gait.setup(self,creature_model)
 
 
-func _add_outlined_part(mesh: PrimitiveMesh, part_position: Vector3, part_rotation: Vector3, part_scale: Vector3, material: Material) -> void:
-	var outline := MeshInstance3D.new()
-	outline.mesh = mesh
-	var outline_material := StandardMaterial3D.new()
-	outline_material.albedo_color = Color("292833")
-	outline_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	outline_material.cull_mode = BaseMaterial3D.CULL_FRONT
-	outline.material_override = outline_material
-	outline.position = part_position
-	outline.rotation_degrees = part_rotation
-	outline.scale = part_scale * 1.055
-	body_visual.add_child(outline)
-	var part := MeshInstance3D.new()
-	part.mesh = mesh
-	part.material_override = material
-	part.position = part_position
-	part.rotation_degrees = part_rotation
-	part.scale = part_scale
-	body_visual.add_child(part)
+func _load_creature(scene: PackedScene, size: float) -> void:
+	creature_model = scene.instantiate()
+	creature_model.name = "SculptedCreature"
+	creature_model.scale = Vector3.ONE * size
+	# Blender's -Y front exports to Godot +Z; align to the simulation's -Z front.
+	creature_model.rotation.y = PI
+	body_visual.add_child(creature_model)
+	var contact := MeshInstance3D.new()
+	contact.name = "SoftContactShadow"
+	var shadow_plane := PlaneMesh.new()
+	shadow_plane.size = Vector2(1.2, 1.9) if species == Species.BURROW_GRAZER else Vector2(1.4, 2.7)
+	contact.mesh = shadow_plane
+	var contact_material := ShaderMaterial.new()
+	contact_material.shader = preload("res://assets/shaders/creature_contact.gdshader")
+	contact.material_override = contact_material
+	contact.position.y = 0.012
+	contact.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	body_visual.add_child(contact)
+	for node in creature_model.find_children("*", "MeshInstance3D", true, false):
+		for surface in node.mesh.get_surface_count():
+			var original := node.get_active_material(surface) as StandardMaterial3D
+			if original == null:
+				continue
+			var ink := ShaderMaterial.new()
+			ink.shader = CreatureShader
+			ink.set_shader_parameter("pigment", original.albedo_color)
+			ink.set_shader_parameter("use_skin_map", original.albedo_texture != null)
+			if original.albedo_texture:
+				ink.set_shader_parameter("skin_map", original.albedo_texture)
+			node.set_surface_override_material(surface, ink)
+	var players := creature_model.find_children("*", "AnimationPlayer", true, false)
+	if not players.is_empty():
+		creature_animation = players[0]
+		for clip in creature_animation.get_animation_list():
+			if clip != "RESET":
+				creature_animation.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+		_play_creature_clip("Idle")
 
 
-func _add_feelers(color: Color, length: float, z_position: float) -> void:
-	var material := _make_toon(color)
-	for side in [-1.0, 1.0]:
-		var feeler := MeshInstance3D.new()
-		var feeler_mesh := CylinderMesh.new()
-		feeler_mesh.top_radius = 0.018
-		feeler_mesh.bottom_radius = 0.035
-		feeler_mesh.height = length
-		feeler_mesh.radial_segments = 6
-		feeler.mesh = feeler_mesh
-		feeler.material_override = material
-		feeler.position = Vector3(side * 0.22, base_height + 0.34, z_position)
-		feeler.rotation_degrees.x = 66.0
-		feeler.rotation_degrees.z = side * 15.0
-		body_visual.add_child(feeler)
+func _play_creature_clip(clip: String) -> void:
+	if creature_animation == null or not creature_animation.has_animation(clip):
+		return
+	if creature_animation.current_animation != clip:
+		creature_animation.play(clip, 0.25)
 
 
 func set_behavior(new_behavior: int) -> void:
@@ -266,18 +198,55 @@ func set_behavior(new_behavior: int) -> void:
 		body_material.emission_enabled = false
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var time := Time.get_ticks_msec() * 0.001
 	if species == Species.GLOW_REED:
 		body_visual.rotation.z = sin(time * 0.72 + organism_id) * 0.035
 		body_visual.scale.y = 1.0 + sin(time * 0.55 + organism_id * 0.41) * 0.025
 		return
+	# Interpolate the 30 Hz ecology on every rendered frame.
+	var ecology := get_parent()
+	if ecology and ecology.is_in_group("ecosystem"):
+		position = _render_previous.lerp(_render_current, clampf(ecology.accumulator / ecology.FIXED_STEP, 0.0, 1.0))
+	else:
+		position = _render_current
 	if move_velocity.length_squared() > 0.02:
 		var direction := Vector3(move_velocity.x, 0.0, move_velocity.y).normalized()
-		var target_yaw := atan2(direction.x, direction.z)
-		rotation.y = lerp_angle(rotation.y, target_yaw, 0.08)
-	body_visual.position.y = sin(time * 2.1 + organism_id) * 0.028
+		var target_yaw := atan2(-direction.x, -direction.z)
+		rotation.y = lerp_angle(rotation.y, target_yaw, 1.0 - exp(-5.0 * delta))
+	if creature_animation:
+		var speed := move_velocity.length()
+		_walking = speed > (0.07 if _walking else 0.18)
+		var clip := "Idle"
+		if _walking:
+			clip = "Walk"
+		elif behavior == Behavior.FEEDING and species == Species.BURROW_GRAZER:
+			clip = "Feed"
+		elif behavior == Behavior.HUNTING and species == Species.VEIL_STALKER:
+			clip = "Alert"
+		_play_creature_clip(clip)
+		var target_rate := clampf(speed / 1.1, 0.45, 1.55) if clip == "Walk" else 1.0
+		creature_animation.speed_scale = lerpf(creature_animation.speed_scale, target_rate, 1.0 - exp(-6.0 * delta))
+		if pigoid_gait:
+			creature_animation.advance(delta)
+			pigoid_gait.update(delta,_walking,speed)
+		elif sterq_gait:
+			creature_animation.advance(delta)
+			sterq_gait.update(delta,_walking,speed)
 
 
 func _sync_transform() -> void:
-	position = Vector3(sim_position.x, 0.0, sim_position.y)
+	var target := Vector3(sim_position.x, 0.0, sim_position.y)
+	if species != Species.GLOW_REED and is_inside_tree():
+		var query := PhysicsRayQueryParameters3D.create(target+Vector3.UP*1.0,target-Vector3.UP)
+		query.collision_mask = 1
+		var hit := get_world_3d().direct_space_state.intersect_ray(query)
+		if not hit.is_empty():target.y=hit.position.y
+	if not _transform_initialized:
+		_render_previous = target
+		_render_current = target
+		position = target
+		_transform_initialized = true
+	else:
+		_render_previous = _render_current
+		_render_current = target

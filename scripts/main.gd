@@ -12,10 +12,22 @@ var ambient_fliers: Array[Node3D] = []
 func _ready() -> void:
 	_configure_input()
 	_build_environment()
+	var crash_site := preload("res://assets/spacecraft/crash_site.tscn").instantiate()
+	crash_site.position = Vector3(-10.0,0.0,16.0)
+	crash_site.rotation.y = -0.3
+	add_child(crash_site)
+	var contacts := Node3D.new()
+	contacts.name = "GroundContacts"
+	contacts.set_script(preload("res://scripts/ground_contacts.gd"))
+	add_child(contacts)
 	_spawn_ecosystem()
 	_spawn_player()
 	_spawn_hud()
 	_spawn_ambient_sound()
+	var reflections := Node.new()
+	reflections.name = "BasinReflections"
+	reflections.set_script(preload("res://scripts/basin_reflection.gd"))
+	add_child(reflections)
 	print("Vesta basin ready: there is no objective. Walk, watch, and listen.")
 
 
@@ -70,15 +82,15 @@ func _build_environment() -> void:
 	environment.sky = sky
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color("c5d2ca")
-	environment.ambient_light_energy = 0.82
+	environment.ambient_light_energy = 0.55
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.fog_enabled = true
 	environment.fog_light_color = Color("cfd2c9")
 	environment.fog_light_energy = 0.55
-	environment.fog_density = 0.012
+	environment.fog_density = 0.003
 	environment.fog_sky_affect = 0.55
 	environment.adjustment_enabled = true
-	environment.adjustment_saturation = 0.78
+	environment.adjustment_saturation = 1.0
 	environment.adjustment_contrast = 1.08
 	world_environment.environment = environment
 	add_child(world_environment)
@@ -87,7 +99,7 @@ func _build_environment() -> void:
 	sun.name = "SoftOvercastLight"
 	sun.rotation_degrees = Vector3(-58.0, -28.0, 0.0)
 	sun.light_color = Color("f2dcc3")
-	sun.light_energy = 1.05
+	sun.light_energy = 0.75
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 70.0
 	add_child(sun)
@@ -95,11 +107,13 @@ func _build_environment() -> void:
 	var ground := MeshInstance3D.new()
 	ground.name = "PaleRainBasin"
 	var plane := PlaneMesh.new()
-	plane.size = Vector2(120.0, 120.0)
+	plane.size = Vector2(440.0, 440.0)
 	plane.subdivide_width = 24
 	plane.subdivide_depth = 24
 	ground.mesh = plane
-	ground.material_override = _toon_material(Color("6f7478"), 0.98)
+	var soil := ShaderMaterial.new()
+	soil.shader = preload("res://assets/shaders/basin_ground.gdshader")
+	ground.material_override = soil
 	add_child(ground)
 
 	var ground_body := StaticBody3D.new()
@@ -112,7 +126,10 @@ func _build_environment() -> void:
 	ground_body.add_child(ground_shape)
 	add_child(ground_body)
 
-	_build_puddles()
+	var terrain := Node3D.new()
+	terrain.name = "BasinTerrain"
+	terrain.set_script(preload("res://scripts/basin_terrain.gd"))
+	add_child(terrain)
 	_spawn_volumetric_flora()
 	_build_ambient_fauna()
 
@@ -122,31 +139,12 @@ func _toon_material(color: Color, roughness := 0.9) -> StandardMaterial3D:
 	material.albedo_color = color
 	material.roughness = roughness
 	material.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-	material.specular_mode = BaseMaterial3D.SPECULAR_TOON
+	material.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	material.metallic_specular = 0.14
-	material.rim_enabled = true
+	material.rim_enabled = false
 	material.rim = 0.26
 	material.rim_tint = 0.42
 	return material
-
-
-func _build_puddles() -> void:
-	var water_material := _toon_material(Color(0.48, 0.58, 0.62, 0.48), 0.42)
-	water_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	var puddles := [
-		[Vector3(-13.0, 0.018, -4.0), Vector2(19.0, 8.0), -7.0],
-		[Vector3(17.0, 0.02, -19.0), Vector2(13.0, 5.5), 12.0],
-		[Vector3(20.0, 0.017, 17.0), Vector2(9.0, 4.0), -18.0],
-	]
-	for data in puddles:
-		var puddle := MeshInstance3D.new()
-		var mesh := PlaneMesh.new()
-		mesh.size = data[1]
-		puddle.mesh = mesh
-		puddle.material_override = water_material
-		puddle.position = data[0]
-		puddle.rotation_degrees.y = data[2]
-		add_child(puddle)
 
 
 func _spawn_volumetric_flora() -> void:

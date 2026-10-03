@@ -35,6 +35,16 @@ func _run() -> void:
 	if world.get_node_or_null("BloomGatePuzzle") != null:
 		_fail("task-driven bloom gate should not exist in quiet-walk mode")
 		return
+	var terrain := world.get_node_or_null("BasinTerrain")
+	if terrain == null or terrain.get_child_count() < 40:
+		_fail("basin terrain details did not build")
+		return
+	if terrain.find_children("ScatteredGravel_*", "MultiMeshInstance3D", false, false).size() != 4:
+		_fail("batched ground gravel is missing")
+		return
+	if terrain.find_children("*", "CollisionShape3D", true, false).size() != 33:
+		_fail("basalt or raised shore collision shapes are missing")
+		return
 	var ambience := world.get_node_or_null("VestaAmbience/RainBasinBed") as AudioStreamPlayer
 	if ambience == null or ambience.stream == null or not ambience.playing:
 		_fail("procedural ambience is missing")
@@ -45,6 +55,22 @@ func _run() -> void:
 		flora_mesh_count = flora.get_mesh_count()
 	if flora == null or flora_mesh_count < 180:
 		_fail("volumetric 3D ecology is missing or too sparse")
+		return
+	if flora.find_children("ReferenceHiHatGrove_*", "Node3D", false, false).size() != 4:
+		_fail("reference tree models were not placed")
+		return
+	if flora.find_children("ReferenceFloraBed_*", "Node3D", false, false).size() != 6:
+		_fail("reference foreground models were not placed")
+		return
+	if flora.find_children("TrunkCollision", "StaticBody3D", true, false).size() != 20:
+		_fail("modeled tree trunks are missing collisions")
+		return
+	var custom_mesh_count := 0
+	for part in flora.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh is ArrayMesh:
+			custom_mesh_count += 1
+	if custom_mesh_count < 100 or flora.breathing_parts.is_empty():
+		_fail("custom surfaces or anchored plant animations are missing")
 		return
 	if world.get_node_or_null("IllustratedHiHat_00") != null or world.get_node_or_null("IllustratedFlora_00") != null:
 		_fail("2D billboard vegetation should not be instantiated")
@@ -58,6 +84,7 @@ func _run() -> void:
 
 	print("PASS: quiet-walk scene with %d volumetric flora meshes, ambience, observations, and optional bio-signals validated" % flora_mesh_count)
 	world.queue_free()
+	await process_frame
 	quit(0)
 
 

@@ -30,6 +30,7 @@ func _ready() -> void:
 	var generator := AudioStreamGenerator.new()
 	generator.mix_rate = MIX_RATE
 	generator.buffer_length = 0.8
+	player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	player.stream = generator
 	player.volume_db = -7.0
 	add_child(player)

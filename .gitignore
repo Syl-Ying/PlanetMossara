@@ -20,3 +20,7 @@ exports/
 # Local IDE settings
 .vscode/
 .idea/
+
+# Blender automatic backups (keep editable .blend sources)
+*.blend1
+*.blend2

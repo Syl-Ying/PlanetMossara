@@ -1,0 +1,11 @@
+{
+  "mesh_objects": 216,
+  "triangles_before_modifiers": 56690,
+  "hull_length_m": 6.31,
+  "length_with_engine_m": 6.99,
+  "body_width_m": 4.0,
+  "floor_length_m": 4.5,
+  "floor_width_m": 2.5,
+  "design_reference": "concepts/crashed_capsule_blueprint.png",
+  "notes": "Script-modeled interpretation; studio stage excluded from GLB; impact base included; no runtime collision added."
+}

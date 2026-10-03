@@ -10,6 +10,8 @@ elif [[ -x "/Applications/Godot.app/Contents/MacOS/Godot" ]]; then
   GODOT_BIN="/Applications/Godot.app/Contents/MacOS/Godot"
 elif [[ -x "$WORKSPACE_GODOT" ]]; then
   GODOT_BIN="$WORKSPACE_GODOT"
+elif [[ -x "/Users/sylviaying/Documents/Codex/2026-09-18/wha/work/godot-runtime/Godot.app/Contents/MacOS/Godot" ]]; then
+  GODOT_BIN="/Users/sylviaying/Documents/Codex/2026-09-18/wha/work/godot-runtime/Godot.app/Contents/MacOS/Godot"
 else
   GODOT_BIN=""
 fi

@@ -12,7 +12,7 @@ var camera: Camera3D
 func _ready() -> void:
 	add_to_group("player")
 	_build_body()
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if OS.has_feature("web") else Input.MOUSE_MODE_CAPTURED)
 
 
 func _build_body() -> void:
