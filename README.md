@@ -8,6 +8,12 @@ A lightweight Godot 4 exploration experience made for an M1 Mac with 16 GB of me
 
 This is a non-commercial fan study inspired by *Scavengers Reign*. It contains no screenshots, soundtrack recordings, or extracted assets from the series. Its procedural 3D environments explore the show's ecological atmosphere through matte colors, misty depth, and low-poly silhouettes reminiscent of 2D animation.
 
+## Gameplay video
+
+[![Watch the Mossara gameplay video](docs/media/mossara-demo.jpg)](https://youtu.be/QHA-b4WFzQw)
+
+[Watch the full gameplay video on YouTube](https://youtu.be/QHA-b4WFzQw) · 2 min 51 sec.
+
 ## Current experience
 
 - No main quest, door puzzles, countdowns, or completion goals.

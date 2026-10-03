@@ -8,6 +8,12 @@
 
 这是受《Scavengers Reign》启发的非商业同人研究。项目不包含剧集截图、原声或提取素材；程序化 3D 场景用接近二维动画的哑光色块、雾化层次与低面数剪影来研究剧集的生态氛围。
 
+## 游戏演示
+
+[![观看苔汐星游戏演示](docs/media/mossara-demo.jpg)](https://youtu.be/QHA-b4WFzQw)
+
+[在 YouTube 观看完整游戏演示](https://youtu.be/QHA-b4WFzQw) · 2 分 51 秒。
+
 ## 目前体验
 
 
