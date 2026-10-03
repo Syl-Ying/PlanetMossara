@@ -28,7 +28,7 @@ func _ready() -> void:
 	reflections.name = "BasinReflections"
 	reflections.set_script(preload("res://scripts/basin_reflection.gd"))
 	add_child(reflections)
-	print("Vesta basin ready: there is no objective. Walk, watch, and listen.")
+	print("Mossara basin ready: there is no objective. Walk, watch, and listen.")
 
 
 func _process(_delta: float) -> void:

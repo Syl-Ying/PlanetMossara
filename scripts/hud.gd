@@ -43,7 +43,7 @@ func _build_intro() -> void:
 	intro.add_child(shade)
 
 	var title := Label.new()
-	title.text = "SCAVENGERS REIGN\nVESTA — A QUIET WALK"
+	title.text = "PLANET MOSSARA"
 	title.position = Vector2(58.0, 55.0)
 	title.add_theme_font_size_override("font_size", 31)
 	title.add_theme_color_override("font_color", Color("f0eee5"))
@@ -59,7 +59,7 @@ func _build_intro() -> void:
 
 func _build_interface() -> void:
 	var location_label := Label.new()
-	location_label.text = "VESTA MINOR  /  RAIN BASIN 03"
+	location_label.text = "MOSSARA  /  RAIN BASIN 03"
 	location_label.position = Vector2(24.0, 20.0)
 	location_label.add_theme_font_size_override("font_size", 13)
 	location_label.add_theme_color_override("font_color", Color(0.88, 0.89, 0.85, 0.72))

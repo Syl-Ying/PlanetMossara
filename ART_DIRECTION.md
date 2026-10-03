@@ -1,39 +1,41 @@
-# Vesta Quiet Walk — 体验方向
+[English](ART_DIRECTION.md) | [Chinese / 中文](ART_DIRECTION-zh.md)
 
-这是一个私人、非商业的《Scavengers Reign》同人练习。它不复刻任何单一镜头，也不包含原剧截图、配乐或提取素材；目标是研究那种“世界并不围绕玩家运转”的视听体验。
+# Planet Mossara — Experience Direction
 
-## 核心感受
+This is a private, non-commercial fan study inspired by *Scavengers Reign*. It does not recreate any individual shot or include screenshots, music, or extracted assets from the series. The aim is to explore an audiovisual experience in which the world does not revolve around the player.
 
-- 玩家不是英雄，也没有需要完成的任务。
-- 场景中总有缓慢而难以完全解释的生命活动。
-- 危险存在，但不应持续追逐玩家或变成战斗循环。
-- 构图保持稀疏，允许玩家停留、听声和观察远景。
-- 生物外形由功能产生：进食器官、孢子传播、压力感知与伪装必须能从造型中读出。
+## Core feeling
 
-## 画面语言
+- The player is not a hero and has no tasks to complete.
+- Slow, not fully explicable forms of life are always active in the scene.
+- Danger exists, but should not constantly pursue the player or turn into a combat loop.
+- Keep compositions sparse, leaving room to linger, listen, and observe distant activity.
+- Creature forms follow function: feeding organs, spore dispersal, pressure sensing, and camouflage should be readable in their anatomy.
 
-- 扁平哑光色块、较少高光、低面数剪影和 Toon 漫反射。
-- 雨后灰蓝、矿物米白、暗李色与少量鲑粉色。
-- Hi-hat trees 提供高而细的垂直节奏；低矮 finger flora 提供近景遮挡。
-- 原二维概念素材只保留为造型参考；运行时全部改用可受光、投影并具有厚度的3D群落。
-- 高树由根系、倾斜主干、七向骨架、双层伞盖与垂膜组成；近景植物使用立体扇叶、孢子杯和弯曲膜片。
-- 植物使用保色的定向明暗、细墨线轮廓与轻微斑驳；近景以弯曲圆头指状体、交错根系、宽扇叶和椭圆孔洞薄膜形成遮挡层次。
-- 水面只做安静反色，不做写实海浪。
-- 雾负责拉开平面层级，让3D更接近二维动画背景。
+## Visual language
 
-## 声音语言
+- Flat, matte color blocks, restrained highlights, low-poly silhouettes, and toon diffuse shading.
+- Post-rain gray-blue, mineral ivory, dark plum, and small accents of salmon pink.
+- Hi-hat trees establish a tall, slender vertical rhythm; low finger flora partially obscures the foreground.
+- Keep the original 2D concept art as shape reference only. At runtime, use fully 3D communities with volume that receive light and cast shadows.
+- Tall trees combine roots, leaning trunks, seven-way branching structures, layered canopies, and hanging membranes. Foreground plants use three-dimensional fan leaves, spore cups, and curved membranes.
+- Plants use directional shading that preserves their colors, fine ink outlines, and subtle mottling. Curved fingers with rounded tips, interwoven roots, broad fan leaves, and membranes with oval openings create layers of foreground occlusion.
+- Water provides quiet reflected color, without realistic ocean waves.
+- Fog separates depth layers, bringing the 3D scene closer to a 2D animated background.
 
-- 没有持续旋律。
-- 循环环境底噪负责风与低频，程序化声源补充稀疏水滴和远处生物鸣叫。
-- 大段安静是设计的一部分。
+## Sound language
 
-## 当前群落
+- No continuous melody.
+- Looping ambience provides wind and low frequencies, while procedural sound sources add sparse water droplets and distant creature calls.
+- Long stretches of quiet are part of the design.
 
-1. **Spore Tree**：根系植物，透明囊随天气呼吸；Pigoid 进食时无意传播孢子。
-2. **Pigoid**：六足牧食生物，以触须读取气味痕迹；通常缓慢结群移动。
-3. **Sterq Serpent**：用侧膜感知空气压力的低伏猎体；捕食频率低，更多时间在远处游移。
-4. **Rain Skimmer**：远景小型飞行生物，只构成慢速群落运动，不与玩家发生任务关系。
+## Current communities
 
-## 交互原则
+1. **Spore Tree**: a rooted plant whose translucent sacs breathe with the weather; feeding Pigoids inadvertently spread its spores.
+2. **Pigoid**: a six-legged grazing creature that reads scent trails with its feelers; usually moves slowly in groups.
+3. **Sterq Serpent**: a low-slung predator that senses air pressure through lateral membranes; hunts infrequently and spends more time drifting in the distance.
+4. **Rain Skimmer**: a small, distant flying creature that contributes slow flock movement without creating quests for the player.
 
-`Q` 与 `E` 不是技能或解谜按钮，而是轻微干预：短暂气味痕迹与地面脉冲。玩家可以完全不用它们。
+## Interaction principles
+
+`Q` and `E` are small interventions: a brief scent trail and a ground pulse. They are not skills or puzzle-solving buttons, and the player can ignore them entirely.

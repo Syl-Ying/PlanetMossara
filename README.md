@@ -1,12 +1,12 @@
 [English](README.md) | [Chinese / 中文](README-zh.md)
 
-# Mossara · 苔汐星
+# Planet Mossara · 苔汐星
 
 **苔汐星 · Mossara** is the name of the planet. “苔” (moss) evokes a damp ecology that grows slowly; “汐” (tide) evokes shallow-water basins and cyclical change.
 
 A lightweight Godot 4 exploration experience made for an M1 Mac with 16 GB of memory. The focus is on walking slowly, watching ecological communities go about their lives, and listening to layers of ambient sound, without missions, win conditions, or survival stats.
 
-This is a non-commercial fan study inspired by *Scavengers Reign*. It contains no screenshots, soundtrack recordings, or extracted assets from the series. Its procedural 3D environments explore the show's ecological atmosphere through matte colors, misty depth, and low-poly silhouettes reminiscent of 2D animation. Existing builds and asset paths still use the earlier name **Vesta Quiet Walk**.
+This is a non-commercial fan study inspired by *Scavengers Reign*. It contains no screenshots, soundtrack recordings, or extracted assets from the series. Its procedural 3D environments explore the show's ecological atmosphere through matte colors, misty depth, and low-poly silhouettes reminiscent of 2D animation.
 
 ## Current experience
 
